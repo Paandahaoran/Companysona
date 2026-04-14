@@ -1,5 +1,5 @@
-const APP_VERSION = "v2.3";
-const CONTENT_VERSION = "v2.3-2026-04-14";
+const APP_VERSION = "V2";
+const CONTENT_VERSION = "V2-2026-04-14";
 
 const dimensions = {
   data: "数据感",
