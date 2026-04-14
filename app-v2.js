@@ -1,5 +1,5 @@
-const APP_VERSION = "v2";
-const CONTENT_VERSION = "v2-2026-04-14";
+const APP_VERSION = "v2.1";
+const CONTENT_VERSION = "v2.1-2026-04-14";
 
 const dimensions = {
   data: "数据感",
@@ -170,142 +170,162 @@ const companies = [
     "合规是底线，但别让每一次合作都像办贷款。"),
 ];
 
+const sceneProfiles = {
+  dji: { risk: 2, report: 1, education: 1 },
+  bytedance: { execution: 2, report: 1, collaboration: 1 },
+  alibaba: { collaboration: 2, packaging: 1, execution: 1 },
+  tencent: { collaboration: 2, emotion: 1, packaging: 1 },
+  huawei: { execution: 2, process: 1, risk: 1 },
+  xiaomi: { execution: 2, service: 1, education: 1 },
+  apple: { packaging: 1, education: 1, risk: 1 },
+  nio: { emotion: 2, service: 2, collaboration: 1 },
+  tesla: { execution: 2, risk: 1, service: 1 },
+  popmart: { packaging: 2, emotion: 1, service: 1 },
+  meituan: { execution: 2, service: 1, collaboration: 1 },
+  loreal: { packaging: 2, report: 1, education: 1 },
+  pdd: { execution: 2, collaboration: 1 },
+  "civil-servant": { process: 2, risk: 1, report: 1 },
+  teacher: { education: 2, emotion: 1, collaboration: 1 },
+  doctor: { risk: 2, service: 1, education: 1 },
+  banker: { process: 2, risk: 2, service: 1 },
+};
+
 function persona(id, company, name, subtitle, quote, color, motifs, scores, definition, analysis, behaviors, strengths, pains, environment, nemesis, survival) {
   return { id, company, name, subtitle, quote, color, motifs, scores, definition, analysis, behaviors, strengths, pains, environment, nemesis, survival };
 }
 
-function option(label, dimensions, bonus) {
-  return { label, dimensions, bonus };
+function option(label, type, dimensions, scene, bonus) {
+  return { label, type, dimensions, scene, bonus };
 }
 
 let nextQuestionId = 1;
 
 const questions = [
-  q("汇报", "明天老板汇报，数据能讲但不好看，你会？",
-    option("开文档补证据链", { data: 2, result: 1 }, { bytedance: 3, dji: 2 }),
-    option("包装成阶段性战役", { result: 2, break: 1 }, { alibaba: 3, pdd: 1 }),
-    option("先把 PPT 顺到能看", { craft: 1, data: -1 }, { tencent: 3, loreal: 2 }),
-    option("先确认口径能不能说", { break: -2, result: 1 }, { "civil-servant": 3, banker: 2 })),
-  q("汇报", "老板在会上问：“所以你要什么支持？”",
-    option("直接列 blocker 和 owner", { data: 2, result: 2 }, { bytedance: 3, huawei: 1 }),
-    option("上升到组织协同问题", { result: 2, break: 1 }, { alibaba: 3, tencent: 1 }),
-    option("先看气氛再递诉求", { break: -1, craft: 1 }, { tencent: 3, nio: 1 }),
-    option("回去补材料再请示", { break: -2, data: 1 }, { "civil-servant": 3, banker: 2 })),
-  q("汇报", "项目复盘第一页，你会先写什么？",
-    option("假设错在哪，下轮怎么试", { data: 2, break: 1 }, { bytedance: 3, dji: 1 }),
-    option("核心抓手和打法沉淀", { result: 2, break: 1 }, { alibaba: 3 }),
-    option("团队努力和外部变量", { craft: 1, data: -1 }, { tencent: 2, nio: 2 }),
-    option("基本情况与存在问题", { data: 1, break: -2 }, { "civil-servant": 3, teacher: 1 })),
-  q("汇报", "临时被抓去 10 分钟汇报，你先做什么？",
-    option("列结论、证据、风险", { data: 2, result: 1 }, { dji: 2, bytedance: 2, doctor: 1 }),
-    option("起一个能装住全局的词", { result: 1, break: 1 }, { alibaba: 3 }),
-    option("做 5 页能看的 PPT", { craft: 1, data: -1 }, { tencent: 3, loreal: 1 }),
-    option("问清参会范围和口径", { break: -2, data: 1 }, { "civil-servant": 3, banker: 1 })),
-  q("汇报", "材料里有页你也觉得虚，但删了成果变少，你会？",
-    option("删，别给自己埋雷", { data: 2, craft: 1 }, { dji: 3, apple: 1 }),
-    option("改成阶段性探索", { result: 1, break: 1 }, { alibaba: 3, bytedance: 1 }),
-    option("换个更顺的表达", { craft: 1, data: -1 }, { tencent: 2, loreal: 3 }),
-    option("先给上级看一眼", { break: -2, result: 1 }, { "civil-servant": 3, banker: 1 })),
-  q("推进", "跨部门同事突然甩锅，说卡点在你这边，你会？",
-    option("拉时间线和证据链", { data: 2, result: 1 }, { dji: 2, bytedance: 2 }),
-    option("重新定义协同边界", { result: 2, break: 1 }, { alibaba: 2, huawei: 2 }),
-    option("私聊缓和一下关系", { break: -1, craft: 1 }, { tencent: 3, nio: 2 }),
-    option("先同步纪要别扩散", { break: -2, data: 1 }, { "civil-servant": 3, banker: 2 })),
-  q("推进", "群里讨论半天没人拍板，你会？",
-    option("写结论让大家确认", { data: 2, result: 1 }, { bytedance: 3 }),
-    option("把问题升维成打法", { result: 2, break: 1 }, { alibaba: 3 }),
-    option("做一版更好看的方案", { craft: 1, data: -1 }, { tencent: 2, loreal: 1 }),
-    option("提醒先走请示流程", { break: -2, result: 1 }, { "civil-servant": 3, banker: 1 })),
-  q("推进", "需求突然改口径，但排期不变，你会？",
-    option("先把变更点写清楚", { data: 2, result: 1 }, { bytedance: 2, dji: 1 }),
-    option("借势重拆一版打法", { break: 2, result: 2 }, { alibaba: 2, tesla: 1 }),
-    option("先安抚，再换个讲法", { craft: 1, break: -1 }, { tencent: 2, nio: 2 }),
-    option("等正式口径再动作", { break: -2, data: 1 }, { "civil-servant": 3, banker: 2 })),
-  q("推进", "资源卡在别的部门，你会先怎么动？",
-    option("列依赖和截止时间", { data: 2, result: 2 }, { bytedance: 2, huawei: 1 }),
-    option("找关键人拉齐盘子", { break: 1, result: 2 }, { alibaba: 3, meituan: 1 }),
-    option("做一版对方好接的材料", { craft: 1, break: -1 }, { tencent: 2, loreal: 1 }),
-    option("先补请示和流转路径", { break: -2, data: 1 }, { "civil-servant": 3, banker: 2 })),
-  q("推进", "项目推进太慢，群里开始焦虑，你会？",
-    option("把 blocker 全列出来", { data: 2, result: 1 }, { bytedance: 3 }),
-    option("重新定一个冲刺节奏", { break: 2, result: 2 }, { tesla: 2, huawei: 1 }),
-    option("先把信心稳住", { craft: 1, data: -1 }, { nio: 2, tencent: 2 }),
-    option("先发一版会议纪要", { break: -1, data: 1 }, { "civil-servant": 2, teacher: 2 })),
-  q("复盘", "一个方案很有感觉，但数据撑不住，你会？",
-    option("先小流量验证", { data: 2, break: 1 }, { bytedance: 3, dji: 1 }),
-    option("先讲用户心智", { result: 1, break: 1 }, { alibaba: 2, loreal: 2 }),
-    option("先把故事讲顺", { craft: 1, data: -1 }, { tencent: 2, popmart: 2 }),
-    option("先别急着表态", { break: -2, data: 1 }, { "civil-servant": 3, banker: 1 })),
-  q("复盘", "会上有人说“这个不够有抓手”，你会？",
-    option("问具体指标卡在哪", { data: 2, result: 1 }, { bytedance: 2, dji: 1 }),
-    option("立刻拆成三层抓手", { result: 2, break: 1 }, { alibaba: 3 }),
-    option("换个更有感的表达", { craft: 1, data: -1 }, { loreal: 2, popmart: 2 }),
-    option("记下来会后再研究", { break: -2, data: 1 }, { "civil-servant": 2, teacher: 1 })),
-  q("复盘", "复盘写到一半，发现锅很难分，你会？",
-    option("按事实链拆责任", { data: 2, result: 1 }, { dji: 2, huawei: 1 }),
-    option("讲组织协同没拉齐", { result: 2, break: 1 }, { alibaba: 3 }),
-    option("把叙事写得体面点", { craft: 1, data: -1 }, { tencent: 2, loreal: 1 }),
-    option("改成原因较复杂", { break: -2, data: 1 }, { "civil-servant": 3, banker: 1 })),
-  q("复盘", "老板说“沉淀一下方法论”，你会？",
-    option("先把数据和样本补齐", { data: 2, craft: 1 }, { dji: 2, bytedance: 2 }),
-    option("写成一套可复制打法", { result: 2, break: 1 }, { alibaba: 3, xiaomi: 1 }),
-    option("做成适合传播的模板", { craft: 1, break: 1 }, { tencent: 1, loreal: 2, popmart: 1 }),
-    option("先形成初步材料", { break: -1, data: 1 }, { "civil-servant": 3, teacher: 1 })),
-  q("复盘", "失败项目要对外同步，你会？",
-    option("讲清假设被证伪", { data: 2, craft: 1 }, { bytedance: 2, dji: 2 }),
-    option("转成阶段性探索", { result: 1, break: 1 }, { alibaba: 3 }),
-    option("先保住团队观感", { craft: 1, data: -1 }, { tencent: 2, nio: 2 }),
-    option("控制措辞和范围", { break: -2, data: 1 }, { "civil-servant": 3, banker: 1 })),
-  q("高压", "周日晚收到“明早过一下”，你第一反应是？",
-    option("先开文档列风险", { data: 2, result: 1 }, { bytedance: 3, dji: 1 }),
-    option("看看能不能变成机会", { break: 2, result: 1 }, { alibaba: 2, tesla: 1 }),
-    option("做个版本给对方安心", { craft: 1, result: 1 }, { tencent: 2, nio: 1 }),
-    option("先问这事急到哪级", { break: -1, data: 1 }, { "civil-servant": 2, banker: 2 })),
-  q("高压", "半夜临时高优插进来，你会？",
-    option("问清指标和截止时间", { data: 2, result: 2 }, { bytedance: 2, huawei: 1 }),
-    option("直接拉战役节奏", { break: 2, result: 2 }, { alibaba: 2, tesla: 2 }),
-    option("先做个能看的版本", { craft: 1, break: 1 }, { tencent: 2, xiaomi: 1 }),
-    option("先看领导怎么定调", { break: -2, data: 1 }, { "civil-servant": 3, banker: 1 })),
-  q("高压", "明明不是你的锅，但锅正在滚过来，你会？",
-    option("立刻补证据链", { data: 2, result: 1 }, { dji: 2, bytedance: 2 }),
-    option("把边界重新定义", { result: 2, break: 1 }, { alibaba: 2, huawei: 1 }),
-    option("私聊关键人降温", { craft: 1, break: -1 }, { tencent: 3, nio: 1 }),
-    option("先留痕别硬刚", { break: -2, data: 1 }, { "civil-servant": 3, banker: 2 })),
-  q("高压", "领导说“简单弄一下”，你听到的是？",
-    option("需求还没定义清楚", { data: 2, craft: 1 }, { dji: 2, bytedance: 1 }),
-    option("这里有个新抓手", { break: 1, result: 2 }, { alibaba: 3 }),
-    option("需要先做得像回事", { craft: 1, result: 1 }, { tencent: 2, loreal: 1 }),
-    option("先别理解过度", { break: -2, data: 1 }, { "civil-servant": 3, banker: 1 })),
-  q("高压", "连续三天都在救火，你会？",
-    option("找根因和复发条件", { data: 2, craft: 1 }, { dji: 2, doctor: 2 }),
-    option("把救火升级成专项", { result: 2, break: 1 }, { alibaba: 2, huawei: 2 }),
-    option("先让大家撑过这波", { craft: 1, result: 1 }, { nio: 2, teacher: 1 }),
-    option("做好记录等复盘", { break: -1, data: 1 }, { "civil-servant": 3, banker: 1 })),
-  q("高压", "计划排得好好的，领导一句话全改了，你会？",
-    option("先重算影响范围", { data: 2, result: 1 }, { bytedance: 2, meituan: 1 }),
-    option("顺势改成新战役", { break: 2, result: 2 }, { alibaba: 3, tesla: 1 }),
-    option("先稳住大家情绪", { craft: 1, break: -1 }, { tencent: 2, nio: 2 }),
-    option("立刻更新口径和材料", { break: -2, data: 1 }, { "civil-servant": 4, banker: 1 })),
-  q("协作", "会前会、会中会、会后会都来了，你会？",
-    option("整一份唯一事实源", { data: 2, result: 1 }, { bytedance: 3, dji: 1 }),
-    option("把各方诉求装进框架", { result: 2, break: 1 }, { alibaba: 3 }),
-    option("做一版大家都能接受的表达", { craft: 1, data: -1 }, { tencent: 3, loreal: 1 }),
-    option("分别确认口径别串台", { break: -2, data: 1 }, { "civil-servant": 3, banker: 1 })),
-  q("协作", "同事说“你这个太细了”，你会？",
-    option("细是为了别返工", { data: 2, craft: 1 }, { dji: 2, apple: 1 }),
-    option("颗粒度决定打法", { result: 1, craft: 1 }, { alibaba: 3 }),
-    option("那我换个好懂的说法", { craft: 1, break: -1 }, { tencent: 2, teacher: 2 }),
-    option("先按领导口径来", { break: -2, data: 1 }, { "civil-servant": 3, banker: 1 })),
-  q("协作", "新需求听起来很玄，你会？",
-    option("问有没有真实样本", { data: 2, craft: 1 }, { dji: 2, doctor: 1 }),
-    option("先拆用户心智链路", { result: 1, break: 1 }, { alibaba: 2, loreal: 2 }),
-    option("先画个故事板看看", { craft: 1, break: 1 }, { popmart: 2, tencent: 1 }),
-    option("等需求方补材料", { break: -2, data: 1 }, { "civil-servant": 3, banker: 1 })),
-  q("协作", "项目快上线了，突然有人提大改，你会？",
-    option("看影响范围和证据", { data: 2, result: 1 }, { dji: 2, bytedance: 1 }),
-    option("判断能不能变成战役", { result: 2, break: 1 }, { alibaba: 2, tesla: 1 }),
-    option("先做视觉和叙事补救", { craft: 1, data: -1 }, { tencent: 2, loreal: 2 }),
-    option("没批示先别动主线", { break: -2, data: 1 }, { "civil-servant": 3, banker: 1 })),
+  q("协作", "你只是协作方，群里突然说“卡在你这边”，你会？",
+    option("先翻记录看谁改过口径", "fact", { data: 2, craft: 1 }, { collaboration: 2, risk: 1 }, { dji: 2, bytedance: 1, doctor: 1 }),
+    option("先私聊对方把火降下来", "people", { break: -1, craft: 1 }, { emotion: 2, collaboration: 1 }, { tencent: 2, nio: 2, teacher: 1 }),
+    option("先把下一步分工写清楚", "boundary", { result: 2, data: 1 }, { collaboration: 2, process: 1 }, { huawei: 2, "civil-servant": 1, banker: 1 }),
+    option("先找能拍板的人定一下", "resource", { break: 1, result: 2 }, { collaboration: 1, execution: 2 }, { alibaba: 1, meituan: 2, pdd: 1 })),
+  q("高压", "领导临时说“下午先改这个”，你原计划全乱，你会？",
+    option("先判断哪些事会被影响", "risk", { data: 2, result: 1 }, { risk: 2, process: 1 }, { "civil-servant": 2, banker: 1, doctor: 1 }),
+    option("先问清楚改到什么程度", "boundary", { data: 1, break: -1 }, { process: 2 }, { "civil-servant": 2, dji: 1, huawei: 1 }),
+    option("先做个能交差的版本", "experiment", { break: 1, result: 2 }, { execution: 2 }, { meituan: 2, xiaomi: 1, tencent: 1 }),
+    option("先安抚被波及的人", "people", { craft: 1, break: -1 }, { emotion: 2, collaboration: 1 }, { nio: 2, teacher: 1, tencent: 1 })),
+  q("汇报", "汇报时对方说“这个数据说明不了问题”，你会？",
+    option("先承认样本限制", "fact", { data: 2, craft: 1 }, { report: 2, risk: 1 }, { dji: 2, doctor: 1, apple: 1 }),
+    option("先补一个可验证动作", "experiment", { data: 1, break: 1, result: 1 }, { report: 1, execution: 1 }, { bytedance: 2, tesla: 1, xiaomi: 1 }),
+    option("先换一种表达方式", "story", { craft: 1, data: -1 }, { report: 2, packaging: 1 }, { tencent: 2, loreal: 2, popmart: 1 }),
+    option("会后补材料再同步", "risk", { break: -1, data: 1 }, { report: 1, process: 2 }, { "civil-servant": 2, banker: 2, teacher: 1 })),
+  q("服务对象", "用户/客户突然改需求，还说“就小改一下”，你会？",
+    option("先问这改动影响哪里", "risk", { data: 2, result: 1 }, { service: 1, execution: 1 }, { doctor: 1, meituan: 2, bytedance: 1 }),
+    option("先把边界说清楚", "boundary", { data: 1, result: 1 }, { service: 1, process: 2 }, { banker: 2, "civil-servant": 1, huawei: 1 }),
+    option("先给个替代方案", "people", { craft: 1, result: 1 }, { service: 2, emotion: 1 }, { nio: 2, tencent: 1, teacher: 1 }),
+    option("先试一个最小版本", "experiment", { break: 2, result: 1 }, { service: 1, execution: 2 }, { tesla: 2, xiaomi: 1, bytedance: 1 })),
+  q("协作", "群里聊了半小时，大家都在说但没人行动，你会？",
+    option("先整理一个待办清单", "explain", { data: 1, result: 2 }, { collaboration: 2, execution: 1 }, { bytedance: 2, teacher: 1, huawei: 1 }),
+    option("先问谁能决定这事", "resource", { result: 2, break: 1 }, { collaboration: 1, execution: 2 }, { meituan: 2, alibaba: 1, pdd: 1 }),
+    option("先把分歧翻译成人话", "explain", { craft: 1, data: 1 }, { collaboration: 2, emotion: 1 }, { tencent: 2, teacher: 2, loreal: 1 }),
+    option("先等一个正式结论", "risk", { break: -2, data: 1 }, { process: 2 }, { "civil-servant": 2, banker: 2 })),
+  q("解释", "你要给一群不同背景的人解释复杂问题，你会？",
+    option("从一个例子开始讲", "explain", { craft: 1, data: 1 }, { education: 2 }, { teacher: 3, tencent: 1, loreal: 1 }),
+    option("先画出关键结构", "fact", { data: 2, craft: 1 }, { education: 1, report: 1 }, { dji: 2, apple: 1, bytedance: 1 }),
+    option("先讲这事和他们有什么关系", "story", { craft: 1, result: 1 }, { education: 1, packaging: 1 }, { loreal: 2, popmart: 1, alibaba: 1 }),
+    option("先列注意事项和禁区", "risk", { data: 1, break: -1 }, { education: 1, risk: 2 }, { doctor: 2, banker: 1, "civil-servant": 1 })),
+  q("情绪劳动", "对方情绪很大，但事情确实要继续推进，你会？",
+    option("先听完，别急着纠错", "people", { craft: 1, break: -1 }, { emotion: 2, service: 1 }, { nio: 3, teacher: 1, tencent: 1 }),
+    option("先确认最危险的问题", "risk", { data: 2, result: 1 }, { emotion: 1, risk: 2 }, { doctor: 3, banker: 1 }),
+    option("先给一个下一步动作", "experiment", { result: 2, break: 1 }, { emotion: 1, execution: 2 }, { meituan: 2, bytedance: 1, xiaomi: 1 }),
+    option("先把责任边界说清", "boundary", { data: 1, result: 1 }, { emotion: 1, process: 1 }, { huawei: 2, "civil-servant": 1, banker: 1 })),
+  q("风险", "一个方案看起来很漂亮，但风险没人提，你会？",
+    option("先问最坏会怎样", "risk", { data: 2, craft: 1 }, { risk: 2 }, { doctor: 2, banker: 2, dji: 1 }),
+    option("先找一组真实反馈", "fact", { data: 2, break: 1 }, { risk: 1, service: 1 }, { bytedance: 2, dji: 1, xiaomi: 1 }),
+    option("先保留亮点，再补风险页", "story", { craft: 1, result: 1 }, { packaging: 1, report: 1 }, { tencent: 2, loreal: 2 }),
+    option("先请相关人确认责任", "boundary", { break: -1, result: 1 }, { process: 2, risk: 1 }, { "civil-servant": 2, huawei: 1, banker: 2 })),
+  q("临场判断", "你接到一个很模糊但很急的任务，会？",
+    option("先追问交付标准", "boundary", { data: 2, result: 1 }, { execution: 1, process: 1 }, { bytedance: 2, dji: 1, huawei: 1 }),
+    option("先做一版能跑的", "experiment", { break: 2, result: 2 }, { execution: 2 }, { tesla: 2, meituan: 2, xiaomi: 1 }),
+    option("先找类似案例抄作业", "resource", { data: 1, craft: 1 }, { execution: 1, education: 1 }, { teacher: 1, loreal: 1, apple: 1 }),
+    option("先确认是不是正式任务", "risk", { break: -2, data: 1 }, { process: 2 }, { "civil-servant": 2, banker: 2 })),
+  q("汇报", "你发现大家其实没听懂，但会已经快结束了，你会？",
+    option("立刻用一句话重讲", "explain", { craft: 1, result: 1 }, { education: 2, report: 1 }, { teacher: 2, tencent: 1, loreal: 1 }),
+    option("会后补一份说明", "fact", { data: 1, craft: 1 }, { report: 1, process: 1 }, { bytedance: 2, "civil-servant": 1 }),
+    option("先抓住关键人对齐", "resource", { result: 2, break: 1 }, { collaboration: 2 }, { alibaba: 2, meituan: 1, pdd: 1 }),
+    option("先让会议按时结束", "people", { break: -1, craft: 1 }, { emotion: 1, collaboration: 1 }, { tencent: 2, nio: 1, banker: 1 })),
+  q("流程", "审批卡住了，但对方一直没回复，你会？",
+    option("先查缺哪份材料", "fact", { data: 2, craft: 1 }, { process: 2 }, { banker: 2, "civil-servant": 2 }),
+    option("先找能推进的人", "resource", { break: 1, result: 2 }, { execution: 2, process: 1 }, { alibaba: 1, meituan: 2, huawei: 1 }),
+    option("先给对方一个台阶", "people", { craft: 1, break: -1 }, { emotion: 1, collaboration: 2 }, { tencent: 2, nio: 1 }),
+    option("先做备用方案", "experiment", { break: 1, result: 1 }, { risk: 1, execution: 1 }, { xiaomi: 1, tesla: 1, bytedance: 1 })),
+  q("内容包装", "同一个内容要发给不同对象，你会？",
+    option("先分清各自关心什么", "fact", { data: 1, craft: 1 }, { packaging: 1, report: 1 }, { bytedance: 1, teacher: 1 }),
+    option("先找最能打的卖点", "story", { result: 2, break: 1 }, { packaging: 2 }, { loreal: 2, popmart: 2, alibaba: 1 }),
+    option("先做一版稳定模板", "explain", { craft: 1, data: 1 }, { education: 1, process: 1 }, { tencent: 1, apple: 1, banker: 1 }),
+    option("先确认哪些不能说", "risk", { break: -1, data: 1 }, { risk: 2, process: 1 }, { "civil-servant": 2, banker: 2, doctor: 1 })),
+  q("服务对象", "客户/用户说“我就要现在”，你会？",
+    option("先判断是不是真紧急", "risk", { data: 2, result: 1 }, { service: 2, risk: 1 }, { doctor: 2, banker: 1, "civil-servant": 1 }),
+    option("先给一个明确时间点", "boundary", { result: 2, data: 1 }, { service: 1, execution: 1 }, { meituan: 2, huawei: 1 }),
+    option("先安抚对方感受", "people", { craft: 1, break: -1 }, { emotion: 2, service: 1 }, { nio: 3, teacher: 1 }),
+    option("先用最小方案止血", "experiment", { break: 2, result: 1 }, { service: 1, execution: 2 }, { tesla: 1, bytedance: 1, xiaomi: 1 })),
+  q("协作", "你发现别人没做，不是不会，是根本没理解，你会？",
+    option("先把关键步骤写出来", "explain", { data: 1, craft: 1 }, { education: 2, collaboration: 1 }, { teacher: 3, bytedance: 1 }),
+    option("先问他卡在哪一步", "people", { craft: 1, data: 1 }, { emotion: 1, collaboration: 2 }, { tencent: 1, nio: 1, teacher: 2 }),
+    option("先重新分配责任", "boundary", { result: 2, data: 1 }, { collaboration: 1, process: 1 }, { huawei: 2, "civil-servant": 1 }),
+    option("先换一种更简单的做法", "experiment", { break: 1, result: 1 }, { execution: 1, education: 1 }, { xiaomi: 2, meituan: 1 })),
+  q("风险", "现场要你立刻表态，但信息明显不全，你会？",
+    option("先说还缺哪些信息", "fact", { data: 2, craft: 1 }, { risk: 2, report: 1 }, { dji: 2, doctor: 1 }),
+    option("先给一个有条件判断", "boundary", { data: 1, result: 1 }, { risk: 1, process: 1 }, { banker: 2, "civil-servant": 1 }),
+    option("先给方向不说死", "people", { craft: 1, break: -1 }, { report: 1, emotion: 1 }, { tencent: 2, nio: 1 }),
+    option("先拍一个小步试试", "experiment", { break: 2, result: 1 }, { execution: 2 }, { tesla: 2, bytedance: 1 })),
+  q("复盘", "事情没做好，但大家都在讲客观原因，你会？",
+    option("先把可控项挑出来", "fact", { data: 2, result: 1 }, { risk: 1, execution: 1 }, { bytedance: 2, dji: 1 }),
+    option("先明确下一轮怎么做", "experiment", { break: 1, result: 2 }, { execution: 2 }, { meituan: 2, xiaomi: 1 }),
+    option("先让复盘别变批斗", "people", { craft: 1, break: -1 }, { emotion: 2, collaboration: 1 }, { teacher: 2, tencent: 1 }),
+    option("先把结论写得稳妥", "risk", { break: -1, data: 1 }, { process: 2, report: 1 }, { "civil-servant": 2, banker: 1 })),
+  q("内容包装", "你觉得一个东西好，但别人完全没感觉，你会？",
+    option("先找真实使用反馈", "fact", { data: 2, craft: 1 }, { service: 1, packaging: 1 }, { bytedance: 1, dji: 1 }),
+    option("先换一个更有画面的说法", "story", { craft: 2, break: 1 }, { packaging: 2 }, { popmart: 3, loreal: 2 }),
+    option("先拆它到底解决什么痛点", "explain", { data: 1, result: 1 }, { education: 1, packaging: 1 }, { teacher: 1, alibaba: 1 }),
+    option("先判断这群人是不是目标对象", "boundary", { data: 1, result: 1 }, { service: 1, risk: 1 }, { banker: 1, apple: 1 })),
+  q("制度流程", "规则和效率冲突了，你会更倾向？",
+    option("先看违规成本多大", "risk", { data: 2, break: -1 }, { risk: 2, process: 1 }, { banker: 3, doctor: 1 }),
+    option("先找有没有灰度路径", "resource", { break: 1, result: 1 }, { process: 1, execution: 1 }, { alibaba: 1, tencent: 1 }),
+    option("先保证交付别断", "experiment", { result: 2, break: 1 }, { execution: 2 }, { meituan: 2, huawei: 1 }),
+    option("先按流程留好痕", "boundary", { break: -2, data: 1 }, { process: 2, risk: 1 }, { "civil-servant": 3, banker: 1 })),
+  q("临场判断", "事情突然变成公开场合，你会？",
+    option("先确认事实有没有错", "fact", { data: 2, craft: 1 }, { report: 1, risk: 1 }, { dji: 2, doctor: 1 }),
+    option("先把主叙事立住", "story", { craft: 1, result: 1 }, { report: 2, packaging: 1 }, { alibaba: 2, loreal: 1 }),
+    option("先控制现场情绪", "people", { craft: 1, break: -1 }, { emotion: 2 }, { tencent: 2, nio: 2, teacher: 1 }),
+    option("先统一对外口径", "risk", { break: -2, data: 1 }, { process: 2, risk: 1 }, { "civil-servant": 3, banker: 2 })),
+  q("协作", "你发现大家目标一致，但语言完全不通，你会？",
+    option("先建一个共同词表", "explain", { data: 1, craft: 1 }, { education: 2, collaboration: 1 }, { teacher: 2, bytedance: 1 }),
+    option("先用案例对齐理解", "people", { craft: 1, data: 1 }, { collaboration: 2 }, { tencent: 2, nio: 1 }),
+    option("先把利益关系画出来", "resource", { result: 1, break: 1 }, { collaboration: 1, execution: 1 }, { alibaba: 2, meituan: 1 }),
+    option("先明确不能误解的边界", "boundary", { data: 1, break: -1 }, { risk: 1, process: 1 }, { banker: 2, "civil-servant": 1 })),
+  q("汇报", "你的方案被说“不够打动人”，你会？",
+    option("先确认事实够不够硬", "fact", { data: 2, craft: 1 }, { report: 1, risk: 1 }, { dji: 2, bytedance: 1 }),
+    option("先换成用户听得懂的话", "explain", { craft: 1, result: 1 }, { report: 1, education: 1 }, { teacher: 2, tencent: 1 }),
+    option("先补一个更强的故事钩子", "story", { craft: 2, break: 1 }, { packaging: 2, report: 1 }, { loreal: 2, popmart: 2 }),
+    option("先问评价标准是什么", "boundary", { data: 1, result: 1 }, { process: 1, report: 1 }, { banker: 1, "civil-servant": 1 })),
+  q("服务对象", "别人把抱怨倒给你，但你解决不了根因，你会？",
+    option("先确认哪些是真问题", "fact", { data: 2, result: 1 }, { service: 1, risk: 1 }, { doctor: 2, dji: 1 }),
+    option("先给出能做的部分", "boundary", { result: 2, data: 1 }, { service: 2, process: 1 }, { banker: 1, meituan: 1, "civil-servant": 1 }),
+    option("先接住情绪再转走", "people", { craft: 1, break: -1 }, { emotion: 2, service: 2 }, { nio: 3, teacher: 1, tencent: 1 }),
+    option("先找资源试着绕一下", "resource", { break: 1, result: 1 }, { service: 1, execution: 1 }, { alibaba: 1, xiaomi: 1 })),
+  q("高压", "你手上活很多，又来了个“顺手帮忙”，你会？",
+    option("先看优先级和影响", "risk", { data: 2, result: 1 }, { risk: 1, execution: 1 }, { bytedance: 1, doctor: 1 }),
+    option("先说清楚我能帮到哪", "boundary", { data: 1, result: 1 }, { process: 1, collaboration: 1 }, { banker: 1, huawei: 1 }),
+    option("先帮他找更合适的人", "resource", { break: 1, craft: 1 }, { collaboration: 2 }, { tencent: 2, alibaba: 1 }),
+    option("先接下来，晚点再崩溃", "people", { craft: 1, result: 1 }, { emotion: 1, execution: 1 }, { teacher: 1, nio: 1, meituan: 1 })),
+  q("解释", "你要教别人一个新流程，你会？",
+    option("先讲为什么要这么做", "explain", { craft: 1, data: 1 }, { education: 2 }, { teacher: 3, loreal: 1 }),
+    option("先给标准模板照着填", "boundary", { data: 1, result: 1 }, { process: 2, education: 1 }, { "civil-servant": 2, banker: 1, bytedance: 1 }),
+    option("先让他做一遍再改", "experiment", { break: 1, result: 1 }, { education: 2, execution: 1 }, { bytedance: 1, xiaomi: 1 }),
+    option("先提醒最容易出错的点", "risk", { data: 1, craft: 1 }, { risk: 2, education: 1 }, { doctor: 2, dji: 1 })),
+  q("总结", "一天结束，你最想知道什么？",
+    option("今天到底学到了什么", "fact", { data: 2, craft: 1 }, { report: 1 }, { dji: 2, apple: 1, bytedance: 1 }),
+    option("明天谁来推进哪件事", "explain", { result: 2, data: 1 }, { execution: 2 }, { huawei: 2, meituan: 1, teacher: 1 }),
+    option("大家心里是不是舒服点", "people", { craft: 1, break: -1 }, { emotion: 2 }, { nio: 2, tencent: 2 }),
+    option("有没有留下不该留的坑", "risk", { data: 1, break: -1 }, { risk: 2, process: 1 }, { banker: 2, "civil-servant": 2, doctor: 1 })),
 ];
 
 function q(chapter, text, ...options) {
@@ -568,12 +588,16 @@ function portraitMarkup(result) {
 function calculateResult() {
   const scores = { data: 50, break: 50, result: 50, craft: 50 };
   const bonus = Object.fromEntries(companies.map((company) => [company.id, 0]));
+  const scenes = {};
 
   state.answers.forEach((answerIndex, questionIndex) => {
     const answer = questions[questionIndex].options[answerIndex];
     if (!answer) return;
     Object.entries(answer.dimensions).forEach(([key, value]) => {
       scores[key] += value * 4.2;
+    });
+    Object.entries(answer.scene).forEach(([key, value]) => {
+      scenes[key] = (scenes[key] || 0) + value;
     });
     Object.entries(answer.bonus).forEach(([key, value]) => {
       bonus[key] = (bonus[key] || 0) + value;
@@ -591,7 +615,8 @@ function calculateResult() {
       return sum + Math.pow(scores[key] - company.scores[key], 2);
     }, 0);
     const similarityScore = 100 - Math.sqrt(distance) / 2;
-    const total = similarityScore + (bonus[company.id] || 0) * 5.5;
+    const sceneScore = getSceneScore(company.id, scenes);
+    const total = similarityScore + sceneScore * 1.8 + (bonus[company.id] || 0) * 5.5;
     if (total > bestScore) {
       best = company;
       bestScore = total;
@@ -602,10 +627,18 @@ function calculateResult() {
   return {
     ...best,
     dimensions: scores,
+    scenes,
     bonus,
     match,
     resultId: `${best.id}-${Date.now().toString(36)}`,
   };
+}
+
+function getSceneScore(companyId, scenes) {
+  const profile = sceneProfiles[companyId] || {};
+  return Object.entries(scenes).reduce((sum, [scene, value]) => {
+    return sum + value * (profile[scene] || 0);
+  }, 0);
 }
 
 function resultFromHash() {
@@ -616,6 +649,7 @@ function resultFromHash() {
   return {
     ...company,
     dimensions: company.scores,
+    scenes: {},
     bonus: {},
     match: 88,
     resultId: `${company.id}-shared`,
@@ -630,6 +664,7 @@ function finishQuiz() {
     result: state.result.id,
     match: state.result.match,
     dimensions: state.result.dimensions,
+    scenes: state.result.scenes,
     bonus: state.result.bonus,
     duration_ms: state.startedAt ? Date.now() - state.startedAt : null,
   });
