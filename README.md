@@ -25,13 +25,16 @@
 - `lib/scoring.ts`
 - `lib/analytics.ts`
 
-## 后续接 Supabase
+## Supabase 指标采集
 
-MVP 可以新增这些表：
+当前前端会写入 Supabase 的 `companysona_events` 表，同时保留 `localStorage` 作为本地备份。
 
-- `sessions`: anonymous_id, source, started_at, completed_at
-- `results`: session_id, result_company, result_slug, match_score, data_score, break_score, result_score, craft_score
-- `events`: session_id, event_name, payload, created_at
-- `feedback`: session_id, result_slug, value, created_at
+上线前需要在 Supabase SQL Editor 里执行 `supabase.sql`。
 
-第一版不存登录身份、不收邮箱、不存历史记录。
+第一版不存登录身份、不收邮箱、不存历史记录，也不存单题明细。核心指标从事件表聚合：
+
+- 完测率：`complete / start`
+- 准确反馈率：`feedback` 事件中 `payload->>'value' = 'accurate'` 的占比
+- 结果分布：按 `result_slug` 聚合 `complete`
+- 分享点击：统计 `share_click`
+- 海报保存：统计 `save_poster`

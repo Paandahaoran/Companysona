@@ -376,13 +376,23 @@ const options = [
   { label: "非常同意", value: 2 },
 ];
 
+const analyticsConfig = {
+  supabaseUrl: "https://qqrxidxvtigyfnbqdvsw.supabase.co",
+  publishableKey: "sb_publishable_9Wd4HPtQiECaHH933UvtZw_-a4sbY4b",
+  table: "companysona_events",
+};
+
 const app = document.querySelector("#app");
+const anonymousId = getStoredId("companysona-anonymous-id");
+
 let state = {
   step: "home",
   index: 0,
   answers: Array(questions.length).fill(null),
   result: null,
   feedback: null,
+  sessionId: getSessionId(),
+  startedAt: null,
 };
 
 function track(event, payload = {}) {
@@ -390,10 +400,77 @@ function track(event, payload = {}) {
     event,
     payload,
     at: new Date().toISOString(),
+    anonymousId,
+    sessionId: state.sessionId,
+    path: location.pathname,
+    hash: location.hash,
+    source: getSource(),
   };
-  const events = JSON.parse(localStorage.getItem("companysona-events") || "[]");
+  const events = safeParse(localStorage.getItem("companysona-events"), []);
   events.push(record);
   localStorage.setItem("companysona-events", JSON.stringify(events.slice(-200)));
+  sendSupabaseEvent(record);
+}
+
+function safeParse(value, fallback) {
+  try {
+    return value ? JSON.parse(value) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function getStoredId(key) {
+  const existing = localStorage.getItem(key);
+  if (existing) return existing;
+  const next = crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  localStorage.setItem(key, next);
+  return next;
+}
+
+function getSessionId() {
+  return crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function getSource() {
+  const params = new URLSearchParams(location.search);
+  return {
+    ref: params.get("ref") || params.get("source") || null,
+    utm_source: params.get("utm_source"),
+    utm_medium: params.get("utm_medium"),
+    utm_campaign: params.get("utm_campaign"),
+  };
+}
+
+function sendSupabaseEvent(record) {
+  const body = {
+    event_name: record.event,
+    anonymous_id: record.anonymousId,
+    session_id: record.sessionId,
+    result_slug: record.payload?.result || null,
+    payload: record.payload,
+    source: record.source,
+    path: record.path,
+    hash: record.hash,
+    user_agent: navigator.userAgent,
+    client_created_at: record.at,
+  };
+
+  fetch(`${analyticsConfig.supabaseUrl}/rest/v1/${analyticsConfig.table}`, {
+    method: "POST",
+    headers: {
+      apikey: analyticsConfig.publishableKey,
+      Authorization: `Bearer ${analyticsConfig.publishableKey}`,
+      "Content-Type": "application/json",
+      Prefer: "return=minimal",
+    },
+    body: JSON.stringify(body),
+    keepalive: true,
+  }).catch(() => {
+    const pending = safeParse(localStorage.getItem("companysona-pending-events"), []);
+    pending.push(body);
+    localStorage.setItem("companysona-pending-events", JSON.stringify(pending.slice(-100)));
+  });
 }
 
 function render() {
@@ -616,6 +693,7 @@ function finishQuiz() {
     result: state.result.id,
     match: state.result.match,
     dimensions: state.result.dimensions,
+    duration_ms: state.startedAt ? Date.now() - state.startedAt : null,
   });
   render();
 }
@@ -717,6 +795,8 @@ app.addEventListener("click", async (event) => {
     state.answers = Array(questions.length).fill(null);
     state.result = null;
     state.feedback = null;
+    state.sessionId = getSessionId();
+    state.startedAt = Date.now();
     track("start");
     render();
   }
@@ -737,7 +817,15 @@ app.addEventListener("click", async (event) => {
   }
 
   if (action === "restart") {
-    state = { step: "home", index: 0, answers: Array(questions.length).fill(null), result: null, feedback: null };
+    state = {
+      step: "home",
+      index: 0,
+      answers: Array(questions.length).fill(null),
+      result: null,
+      feedback: null,
+      sessionId: getSessionId(),
+      startedAt: null,
+    };
     history.replaceState(null, "", location.pathname);
     track("restart");
     render();
@@ -771,6 +859,8 @@ if (sharedResult) {
   state.step = "result";
   state.result = sharedResult;
   track("shared_result_open", { result: sharedResult.id });
+} else {
+  track("page_view");
 }
 
 render();

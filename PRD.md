@@ -120,12 +120,9 @@
 - 前端 Canvas 海报生成
 - JSON 内容配置，稳定后迁移 CMS 或后台
 
-Supabase 表建议：
+Supabase 表：
 
-- `sessions`
-- `results`
-- `events`
-- `feedback`
+第一版使用单表 `companysona_events` 记录匿名事件流，建表 SQL 见 `supabase.sql`。
 
 ## 指标
 
